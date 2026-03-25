@@ -1,6 +1,10 @@
 ## ldap_proto.nim -- LDAP protocol codec (BER/DER encoding).
 {.experimental: "strict_funcs".}
-import lattice
+import basis/code/choice
+
+type
+  BridgeError* = object of CatchableError
+
 type
   BerTag* = uint8
   BerClass* = enum bcUniversal, bcApplication, bcContext, bcPrivate

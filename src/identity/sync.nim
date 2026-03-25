@@ -1,14 +1,14 @@
 ## sync.nim -- Sync users/groups into porta entity store.
 {.experimental: "strict_funcs".}
 import std/tables
-import lattice, ldap_client
+import basis/code/choice, ldap_client
 type
-  AddEntityFn* = proc(entity_type, id: string, attrs: Table[string, string]): Result[void, BridgeError] {.raises: [].}
+  AddEntityFn* = proc(entity_type, id: string, attrs: Table[string, string]): Choice[bool] {.raises: [].}
   SyncResult* = object
     users_synced*: int
     groups_synced*: int
 proc sync_ldap_entries*(entries: seq[LdapEntry], add_fn: AddEntityFn
-                       ): Result[SyncResult, BridgeError] =
+                       ): Choice[SyncResult] =
   var sr: SyncResult
   for entry in entries:
     var attrs: Table[string, string]
@@ -21,4 +21,4 @@ proc sync_ldap_entries*(entries: seq[LdapEntry], add_fn: AddEntityFn
     if r.is_bad: continue
     if entity_type == "User": inc sr.users_synced
     else: inc sr.groups_synced
-  Result[SyncResult, BridgeError].good(sr)
+  good(sr)

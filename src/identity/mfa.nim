@@ -6,7 +6,7 @@ Multi-factor authentication: TOTP, recovery codes, OIDC, SAML, session, federati
 ]#
 import basis/code/throw
 standard_pragmas(effects=false, rise=false)
-import std/[strutils, tables, hashes, random, json, base64, uri]
+import std/[strutils, tables, hashes, random, json, base64, uri, xmltree]
 
 type
   MfaMethod* = enum mmTotp, mmRecoveryCodes
@@ -150,9 +150,18 @@ func validateIdToken*(claims: IdTokenClaims, expectedIss, expectedAud, expectedN
 
 # SAML
 func buildAuthnRequest*(sp: SamlSpConfig, idp: SamlIdpConfig, requestId, issueInstant: string): string =
-  "<samlp:AuthnRequest ID=\"" & requestId & "\" IssueInstant=\"" & issueInstant &
-  "\" Destination=\"" & idp.ssoUrl & "\" AssertionConsumerServiceURL=\"" &
-  sp.assertionConsumerUrl & "\"><saml:Issuer>" & sp.entityId & "</saml:Issuer></samlp:AuthnRequest>"
+  ## Build SAML AuthnRequest via std/xmltree (proper XML generation, not string concat).
+  var req = newElement("samlp:AuthnRequest")
+  req.attrs = {"ID": requestId, "IssueInstant": issueInstant,
+               "Destination": idp.ssoUrl,
+               "AssertionConsumerServiceURL": sp.assertionConsumerUrl,
+               "xmlns:samlp": "urn:oasis:names:tc:SAML:2.0:protocol",
+               "xmlns:saml": "urn:oasis:names:tc:SAML:2.0:assertion",
+               "Version": "2.0"}.toXmlAttributes
+  var issuer = newElement("saml:Issuer")
+  issuer.add(newText(sp.entityId))
+  req.add(issuer)
+  $req
 
 func mapAttributes*(assertion: SamlAssertion, mapping: Table[string, string]): Table[string, string] =
   for ext, intField in mapping:

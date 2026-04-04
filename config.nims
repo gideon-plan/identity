@@ -2,6 +2,7 @@ import std/os
 
 switch("path", "src")
 switch("threads", "on")
+switch("outdir", ".out")
 
 let httpffi = thisDir() & "/../httpffi"
 let ffi = httpffi & "/src/httpffi/ffi"

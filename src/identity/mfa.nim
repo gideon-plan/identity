@@ -4,6 +4,7 @@ mfa
 ===
 Multi-factor authentication: TOTP, recovery codes, OIDC, SAML, session, federation.
 ]#
+{.experimental: "strictFuncs".}
 import basis/code/throw
 standard_pragmas(effects=false, rise=false)
 import std/[strutils, tables, hashes, random, json, base64, uri, xmltree]

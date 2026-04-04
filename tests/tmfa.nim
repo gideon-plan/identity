@@ -1,3 +1,4 @@
+{.experimental: "strictFuncs".}
 import std/[unittest, tables, strutils]
 import identity/mfa
 suite "TOTP":
